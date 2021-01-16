@@ -1,0 +1,21 @@
+<mat-toolbar color="primary">
+  <h2>{{ title }}</h2>
+  <button *ngIf="!token" mat-raised-button (click)="openAuthDialog()">Authorise</button>
+</mat-toolbar>
+
+<div class="container">
+  <mat-spinner *ngIf="loading"></mat-spinner>
+  <h2 *ngIf="!loading || state?.esp_is_connected == false">ESP is not connected</h2>
+
+  <ng-container *ngIf="!loading && state?.esp_is_connected">
+    <p>Last recieved {{ state?.most_recent_state.last_recieved }} </p>
+
+    <form>
+      <mat-slide-toggle *ngFor="let light of lights; let i = index" [checked]="light">
+        Light {{ i }}
+      </mat-slide-toggle>
+
+      <button mat-raised-button color="primary" type="submit" (click)="setState()">Update State</button>
+    </form>
+  </ng-container>
+</div>

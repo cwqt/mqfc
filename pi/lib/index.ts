@@ -3,7 +3,7 @@ import morgan from "morgan";
 import bodyParser from "body-parser";
 import cors from "cors";
 import log, { stream } from "./common/logger";
-import http, { ClientRequest } from "http";
+import http from "http";
 import helmet from "helmet";
 import mqtt from "async-mqtt";
 import "reflect-metadata";
