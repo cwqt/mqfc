@@ -2,7 +2,7 @@
 
 Message Queuing Farm Controller 
 
-## API
+## API
 
 * `GET /state`: Get state of farm lights
 * `POST /state/:oid`: Set state of a farm light 
