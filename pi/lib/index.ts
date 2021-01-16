@@ -58,10 +58,6 @@ interface IStateCache {
     });
 
     client.on("message", (topic, payload) => {
-      console.log(topic)
-
-      console.log(espConnected, lastStateCache)
-
       switch (topic) {
         case "esp32/connected":
           return (espConnected = payload.toString() == "true");
