@@ -2,4 +2,9 @@
     from = "/api/*"
     to = "API_URL"
     force = true
-    headers = {Bypass-Tunnel-Reminder = "please"}
+    status = 200
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Bypass-Tunnel-Reminder = "please"
