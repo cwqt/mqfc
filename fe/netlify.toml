@@ -1,5 +1,5 @@
 [[redirects]]
     from = "/api/*"
-    to = API_URL
+    to = "API_URL"
     force = true
     headers = {Bypass-Tunnel-Reminder = "please"}
