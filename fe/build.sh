@@ -1,4 +1,7 @@
-sed -i -e "s/API_URL/$API_URL/g" ./netlify.toml
+
+ESCAPED_REPLACE=$(printf '%s\n' "$API_URL" | sed -e 's/[\/&]/\\&/g')
+sed -i -e "s/API_URL/$ESCAPED_REPLACE/g" ./netlify.toml
+
 cat netlify.toml
 npm install
 npm run build
