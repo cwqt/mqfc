@@ -10,6 +10,7 @@ import { AuthComponent } from './auth/auth.component';
   styleUrls: ['./app.component.scss'],
 })
 export class AppComponent implements OnInit {
+  allOn:boolean = false;
   title = 'mqfc-fe';
   lights = [
     { checked: false },
@@ -59,5 +60,15 @@ export class AppComponent implements OnInit {
         Authorization: `Bearer ${this.token}`
       }
     }).toPromise();
+  }
+
+  async toggleAll() {
+    this.allOn = !this.allOn;
+    this.lights = [...this.lights.map(l => {
+      l.checked = this.allOn;
+      return l;
+    })]
+
+    this.setState();
   }
 }

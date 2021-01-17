@@ -10,6 +10,7 @@ mat-toolbar button {
 .cards {
   display: flex;
   flex-wrap: wrap;
+  flex-flow: column;
   mat-card {
     flex: 1;
     margin: 5px

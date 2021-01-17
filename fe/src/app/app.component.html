@@ -22,5 +22,8 @@
       </mat-card>
     </div>
 
+    <br />
+    <button [disabled]="!token" mat-raised-button color="primary" (click)="toggleAll()">Turn all {{  allOn ? 'off' : 'on' }}</button>
+
   </ng-container>
 </div>

@@ -7,7 +7,7 @@ import http from "http";
 import helmet from "helmet";
 import jsonwebtoken from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
-import localtunnel from 'localtunnel';
+import localtunnel from "localtunnel";
 
 import jwt from "express-jwt";
 import mqtt from "async-mqtt";
@@ -24,10 +24,10 @@ const app = express();
 app.set("trust proxy", 1);
 app.use(bodyParser.json());
 // app.use(cors());
-// app.use(helmet());
+app.use(helmet());
 app.use(morgan("tiny", { stream }));
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
@@ -69,9 +69,13 @@ interface IStateCache {
     });
 
     client.on("message", (topic, payload) => {
+      logger.info(`Recieved topic message: ${topic}`, payload);
       switch (topic) {
-        case "esp32/connected":
-          return (espConnected = payload.toString() == "true");
+        case "esp32/connected": {
+          (espConnected = payload.toString() == "true");
+          if(lastStateCache) client.publish("esp32/state", JSON.stringify(lastStateCache.data));
+          return;
+        }
         case "esp32/state":
           return (lastStateCache = {
             last_recieved: new Date().getTime(),
@@ -83,18 +87,31 @@ interface IStateCache {
       logger.error(`No handler for topic ${topic}`);
     });
 
+    // ESP Should publish connected state every 10 minutes
+    setInterval(() => {
+      if (lastStateCache.last_recieved) {
+        const now = new Date();
+        const difference = (now.getTime() - new Date(lastStateCache.last_recieved).getTime()) / 1000;
+        if (difference > 600) {
+          espConnected = false;
+        }
+      } else {
+        espConnected = false;
+      }
+    }, 600000);
+
     // HTTP Tunneling -----------------------------------------------------------------------------
     const lt = await localtunnel({
       port: config.EXPRESS_PORT,
       subdomain: config.TUNNEL_HOST,
-      allow_invalid_cert: true
-    })
+      allow_invalid_cert: true,
+    });
 
-    logger.info(`HTTP Tunnelling active at: ${lt.url}`)
+    logger.info(`HTTP Tunnelling active at: ${lt.url}`);
 
     // Routes -------------------------------------------------------------------------------------
     const router = AsyncRouter();
-    router.get(`/`, (req, res) => res.send(`mqfc - Message Queuing Farm Controller`))
+    router.get(`/`, (req, res) => res.send(`mqfc - Message Queuing Farm Controller`));
 
     router.post(
       "/token",
@@ -126,12 +143,7 @@ interface IStateCache {
     router.post("/state", jwt({ secret: config.PRIVATE_KEY, algorithms: ["HS256"] }), async (req, res) => {
       await client.publish(
         "esp32/state",
-        JSON.stringify({
-          0: req.body[0] || false,
-          1: req.body[1] || false,
-          2: req.body[2] || false,
-          3: req.body[3] || false,
-        })
+        JSON.stringify([req.body[0] || false, req.body[1] || false, req.body[2] || false, req.body[3] || false])
       );
     });
 
