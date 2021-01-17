@@ -1,4 +1,3 @@
-echo "API URL: " $API_URL
 sed -i -e "s/API_URL/$API_URL/g" ./netlify.toml
 cat netlify.toml
 npm install
