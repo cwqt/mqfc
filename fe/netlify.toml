@@ -3,6 +3,7 @@
     to = "API_URL"
     force = true
     status = 200
+    headers = {Bypass-Tunnel-Reminder = "please"}
 
 [[headers]]
   for = "/api/*"
