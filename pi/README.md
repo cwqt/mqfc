@@ -16,6 +16,7 @@ rabbitmq-plugins enable rabbitmq_amqp1_0
 ## .env
 
 ```
-PASSWORD="something"
-PRIVATE_KEY="somethingelse"
+PASSWORD="somepassword"
+PRIVATE_KEY="someprivatekey"
+TUNNEL_HOST="somehostname"
 ```

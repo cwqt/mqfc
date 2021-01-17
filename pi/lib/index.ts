@@ -1,12 +1,14 @@
-import express, { json, response } from "express";
+import express from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import cors from "cors";
 import log, { stream } from "./common/logger";
 import http from "http";
 import helmet from "helmet";
-import jsonwebtoken, { JsonWebTokenError } from "jsonwebtoken";
+import jsonwebtoken from "jsonwebtoken";
 import rateLimit from "express-rate-limit";
+import localtunnel from 'localtunnel';
+
 import jwt from "express-jwt";
 import mqtt from "async-mqtt";
 import "reflect-metadata";
@@ -38,6 +40,7 @@ interface IStateCache {
   let lastStateCache: IStateCache;
 
   try {
+    // MQTT ---------------------------------------------------------------------------------------
     let client: mqtt.AsyncMqttClient;
     try {
       logger.info(`Connecting to RabbitMQ...`);
@@ -54,7 +57,7 @@ interface IStateCache {
     });
 
     client.on("connect", async (packet) => {
-      logger.info("Connected!");
+      logger.info("Connected to RabbitMQ");
       await client.subscribe("esp32/connected");
       await client.subscribe("esp32/state");
     });
@@ -74,8 +77,19 @@ interface IStateCache {
       logger.error(`No handler for topic ${topic}`);
     });
 
-    // Routes ---------------------------------------------------------------------------
+    // HTTP Tunneling -----------------------------------------------------------------------------
+    const lt = await localtunnel({
+      port: config.EXPRESS_PORT,
+      subdomain: config.TUNNEL_HOST,
+      allow_invalid_cert: true
+    })
+
+    logger.info(`HTTP Tunnelling active at: ${lt.url}`)
+
+    // Routes -------------------------------------------------------------------------------------
     const router = AsyncRouter();
+    router.get(`/`, (req, res) => res.send(`mqfc - Message Queuing Farm Controller`))
+
     router.post(
       "/token",
       rateLimit({
