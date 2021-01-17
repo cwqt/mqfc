@@ -6,27 +6,34 @@ import { environment } from 'src/environments/environment';
 @Component({
   selector: 'app-auth',
   templateUrl: './auth.component.html',
-  styleUrls: ['./auth.component.scss']
+  styleUrls: ['./auth.component.scss'],
 })
 export class AuthComponent implements OnInit {
   loading: boolean = false;
-  password:string;
-  error:string
+  password: string;
+  error: string;
 
-  constructor(private http:HttpClient, private dialogRef: MatDialogRef<AuthComponent>) { }
+  constructor(
+    private http: HttpClient,
+    private dialogRef: MatDialogRef<AuthComponent>
+  ) {}
 
-  ngOnInit(): void {
-  }
+  ngOnInit(): void {}
 
   authenticate() {
     this.loading = true;
     this.http
-      .post(`${environment.api_url}/token`, { password: this.password })
+      .post(
+        `${environment.api_url}/token`,
+        { password: this.password },
+      )
       .toPromise()
-      .then(data => {
+      .then((data) => {
         this.dialogRef.close(data);
       })
-      .catch((error:HttpErrorResponse) => this.error = JSON.stringify(error.error))
-      .finally(() => this.loading = false);
+      .catch(
+        (error: HttpErrorResponse) => (this.error = JSON.stringify(error.error))
+      )
+      .finally(() => (this.loading = false));
   }
 }

@@ -23,9 +23,15 @@ let server: http.Server;
 const app = express();
 app.set("trust proxy", 1);
 app.use(bodyParser.json());
-app.use(cors());
-app.use(helmet());
+// app.use(cors());
+// app.use(helmet());
 app.use(morgan("tiny", { stream }));
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 logger.info("Started node process");
 
