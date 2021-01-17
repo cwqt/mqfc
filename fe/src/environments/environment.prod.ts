@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  api_url: "https://api.mqfc.cass.si"
+  api_url: "/api" // netlify re-writes
 };
