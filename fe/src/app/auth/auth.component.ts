@@ -1,6 +1,7 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'app-auth',
@@ -20,7 +21,7 @@ export class AuthComponent implements OnInit {
   authenticate() {
     this.loading = true;
     this.http
-      .post(`http://localhost:3000/token`, { password: this.password })
+      .post(`${environment.api_url}/token`, { password: this.password })
       .toPromise()
       .then(data => {
         this.dialogRef.close(data);

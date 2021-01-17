@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { environment } from 'src/environments/environment';
 import { AuthComponent } from './auth/auth.component';
 
 @Component({
@@ -38,7 +39,7 @@ export class AppComponent implements OnInit {
     this.loading = true;
 
     this.http
-      .get(`http://localhost:3000/state`)
+      .get(`${environment.api_url}/state`)
       .toPromise()
       .then((result: any) => {
         this.state = result;
@@ -53,7 +54,7 @@ export class AppComponent implements OnInit {
 
   async setState() {
     console.log('Setting state')
-    await this.http.post(`http://localhost:3000/state`, this.lights.map(l => l.checked), {
+    await this.http.post(`${environment.api_url}/state`, this.lights.map(l => l.checked), {
       headers: {
         Authorization: `Bearer ${this.token}`
       }

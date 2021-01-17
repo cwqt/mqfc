@@ -12,3 +12,10 @@ rabbitmq-plugins enable rabbitmq_mqtt
 rabbitmq-plugins enable rabbitmq_web_mqtt
 rabbitmq-plugins enable rabbitmq_amqp1_0
 ```
+
+## .env
+
+```
+PASSWORD="something"
+PRIVATE_KEY="somethingelse"
+```
