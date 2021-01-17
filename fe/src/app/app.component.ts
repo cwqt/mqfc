@@ -10,7 +10,12 @@ import { AuthComponent } from './auth/auth.component';
 })
 export class AppComponent implements OnInit {
   title = 'mqfc-fe';
-  lights = [false, false, false, false];
+  lights = [
+    { checked: false },
+    { checked: false },
+    { checked: false },
+    { checked: false },
+  ];
   state: any;
   loading: boolean = false;
   token: string | null;
@@ -22,29 +27,36 @@ export class AppComponent implements OnInit {
   }
 
   async openAuthDialog() {
-    const dialogRef = this.dialog.open(AuthComponent, {
-    });
+    const dialogRef = this.dialog.open(AuthComponent, {});
 
-    dialogRef.afterClosed().subscribe((result:any) => {
-      console.log('The dialog was closed');
+    dialogRef.afterClosed().subscribe((result: any) => {
+      this.token = result.data;
     });
   }
 
   async getState() {
     this.loading = true;
+
     this.http
       .get(`http://localhost:3000/state`)
       .toPromise()
       .then((result: any) => {
         this.state = result;
-        this.lights = Object.values(
-          result.most_recent_state?.data || this.lights
-        );
+        if(result.most_recent_state) {
+          Object.values(result.most_recent_state.data).forEach((s, idx) => {
+            this.lights[idx].checked = s as boolean;
+          })
+        }
       })
       .finally(() => (this.loading = false));
   }
 
   async setState() {
-    this.http.post(`/api/state`, this.lights);
+    console.log('Setting state')
+    await this.http.post(`http://localhost:3000/state`, this.lights.map(l => l.checked), {
+      headers: {
+        Authorization: `Bearer ${this.token}`
+      }
+    }).toPromise();
   }
 }

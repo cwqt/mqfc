@@ -14,6 +14,7 @@ import { AuthComponent } from './auth/auth.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import { FormsModule } from '@angular/forms';
 import {MatInputModule} from '@angular/material/input';
+import {MatCardModule} from '@angular/material/card';
 
 
 
@@ -34,7 +35,8 @@ import {MatInputModule} from '@angular/material/input';
     MatDialogModule,
     MatProgressSpinnerModule,
     MatInputModule,
-    FormsModule
+    FormsModule,
+    MatCardModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,21 +1,26 @@
-<mat-toolbar color="primary">
+<mat-toolbar color="primary" class="space">
   <h2>{{ title }}</h2>
   <button *ngIf="!token" mat-raised-button (click)="openAuthDialog()">Authorise</button>
 </mat-toolbar>
 
-<div class="container">
+<div class="container space">
+  <!-- {{ state | json }} -->
+
   <mat-spinner *ngIf="loading"></mat-spinner>
-  <h2 *ngIf="!loading || state?.esp_is_connected == false">ESP is not connected</h2>
+  <h2 *ngIf="!loading && state?.esp_is_connected == false">ESP is not connected</h2>
+
+  <p *ngIf="!token && !loading">Read-only until authorised</p>
 
   <ng-container *ngIf="!loading && state?.esp_is_connected">
-    <p>Last recieved {{ state?.most_recent_state.last_recieved }} </p>
+    <p>Last recieved: {{ state?.most_recent_state?.last_recieved | date:'full' }} </p>
 
-    <form>
-      <mat-slide-toggle *ngFor="let light of lights; let i = index" [checked]="light">
-        Light {{ i }}
-      </mat-slide-toggle>
+    <div class="cards">
+      <mat-card *ngFor="let light of lights; let i = index;">
+        <mat-slide-toggle [disabled]="!token" [(ngModel)]="light.checked" (change)="setState()">
+          Light {{ i }}
+        </mat-slide-toggle>
+      </mat-card>
+    </div>
 
-      <button mat-raised-button color="primary" type="submit" (click)="setState()">Update State</button>
-    </form>
   </ng-container>
 </div>

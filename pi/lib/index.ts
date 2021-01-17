@@ -1,10 +1,13 @@
-import express from "express";
+import express, { json, response } from "express";
 import morgan from "morgan";
 import bodyParser from "body-parser";
 import cors from "cors";
 import log, { stream } from "./common/logger";
 import http from "http";
 import helmet from "helmet";
+import jsonwebtoken, { JsonWebTokenError } from "jsonwebtoken";
+import rateLimit from "express-rate-limit";
+import jwt from "express-jwt";
 import mqtt from "async-mqtt";
 import "reflect-metadata";
 
@@ -22,7 +25,7 @@ app.use(cors());
 app.use(helmet());
 app.use(morgan("tiny", { stream }));
 
-logger.info('Started node process');
+logger.info("Started node process");
 
 interface IStateCache {
   _id: number;
@@ -31,28 +34,27 @@ interface IStateCache {
 }
 
 (async () => {
-  let espConnected: boolean = false;
+  let espConnected: boolean = true;
   let lastStateCache: IStateCache;
 
   try {
     let client: mqtt.AsyncMqttClient;
     try {
-      logger.info(`Connecting to RabbitMQ...`)
+      logger.info(`Connecting to RabbitMQ...`);
       client = mqtt.connect({
-          username: "guest",
-          password: "guest"
-        }
-      );
+        username: "guest",
+        password: "guest",
+      });
     } catch (error) {
       gracefulExit(error);
     }
 
-    client.on('error', err => {
+    client.on("error", (err) => {
       logger.error(err);
-    })
+    });
 
-    client.on("connect", async packet => {
-      logger.info("Connected!")
+    client.on("connect", async (packet) => {
+      logger.info("Connected!");
       await client.subscribe("esp32/connected");
       await client.subscribe("esp32/state");
     });
@@ -74,6 +76,24 @@ interface IStateCache {
 
     // Routes ---------------------------------------------------------------------------
     const router = AsyncRouter();
+    router.post(
+      "/token",
+      rateLimit({
+        windowMs: 60 * 60 * 1000,
+        max: 5, // 5 attempts / hour
+        message: JSON.stringify({ error: "Please fuck off" }),
+      }),
+      async (req, res) => {
+        const password = req.body.password;
+        if (!password) return res.status(401).json({ error: "No password provided" });
+        if (password !== config.PASSWORD) return res.status(401).json({ error: "Incorrect password " });
+
+        return res.status(200).json({
+          data: jsonwebtoken.sign({ created: new Date().getTime() }, config.PRIVATE_KEY, { algorithm: "HS256" }),
+        });
+      }
+    );
+
     // Getting the state from storage
     router.get("/state", async (req, res) =>
       res.json({
@@ -83,7 +103,7 @@ interface IStateCache {
     );
 
     // Setting the state
-    router.post("/state", async (req, res) => {
+    router.post("/state", jwt({ secret: config.PRIVATE_KEY, algorithms: ["HS256"] }), async (req, res) => {
       await client.publish(
         "esp32/state",
         JSON.stringify({
@@ -96,6 +116,15 @@ interface IStateCache {
     });
 
     app.use(router);
+
+    // Aggressively rate limit
+    app.use(
+      rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 50, // limit each IP to 100 requests per windowMs
+        message: JSON.stringify({ error: "Too many requests" }),
+      })
+    );
 
     // Catch 404 errors
     app.all("*", (req: any, res: any, next: any) => {
@@ -119,14 +148,14 @@ interface IStateCache {
   }
 })();
 
-function gracefulExit(client?:mqtt.AsyncMqttClient, error?:any) {
-  return (err:any) => {
+function gracefulExit(client?: mqtt.AsyncMqttClient, error?: any) {
+  return (err: any) => {
     log.info(`Termination requested, closing all connections`);
     logger.error(error || err);
     client?.end();
     server.close();
     process.exit(1);
-  }
+  };
 }
 
 export default {

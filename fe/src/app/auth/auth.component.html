@@ -10,5 +10,9 @@
 
   <br />
 
-  <button mat-raised-button color="primary" [disabled]="loading" (click)="authenticate()">Authenticate</button>
+  <button mat-raised-button color="primary" type="submit" [disabled]="loading" (click)="authenticate()">Authenticate</button>
+
+  <br />
+  <br />
+  <code *ngIf="error">{{ error }}</code>
 </div>

@@ -1,19 +1,27 @@
 .container {
-  padding: 20px;
+  margin: 20px 0;
 
-  form {
-    display: flex;
-    flex-flow: column;
-    mat-slide-toggle {
-      margin-bottom: 20px;
-    }
-    button {
-      width: auto;
-      margin-right: auto;
-    }
-  }
 }
 
 mat-toolbar button {
   margin-left: auto;
 }
+
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  mat-card {
+    flex: 1;
+    margin: 5px
+  }
+}
+
+.space {
+  padding: 0 2vw;
+}
+
+$breakpoint-tablet: 768px;
+@media (min-width: $breakpoint-tablet) {
+  .space { padding: 0 30vw !important }
+}
+

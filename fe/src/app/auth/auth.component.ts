@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-auth',
@@ -9,17 +10,22 @@ import { Component, OnInit } from '@angular/core';
 export class AuthComponent implements OnInit {
   loading: boolean = false;
   password:string;
+  error:string
 
-  constructor(private http:HttpClient) { }
+  constructor(private http:HttpClient, private dialogRef: MatDialogRef<AuthComponent>) { }
 
   ngOnInit(): void {
   }
 
   authenticate() {
     this.loading = true;
-    setTimeout(() => this.loading = false, 1000);
-    // this.http
-    //   .get(`http://localhost:3000/token`)
-    //   .toPromise();
+    this.http
+      .post(`http://localhost:3000/token`, { password: this.password })
+      .toPromise()
+      .then(data => {
+        this.dialogRef.close(data);
+      })
+      .catch((error:HttpErrorResponse) => this.error = JSON.stringify(error.error))
+      .finally(() => this.loading = false);
   }
 }
